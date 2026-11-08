@@ -36,19 +36,20 @@ jobs:
       - name: Sync Files
         run: npx cap sync
 
-      # ПРИНУДИТЕЛЬНО МЕНЯЕМ ВЕРСИЮ GRADLE НА СТАБИЛЬНУЮ 8.1.1
-      - name: Downgrade Gradle to 8.1.1
+      # Возвращаем рабочую версию Gradle 8.5 (она не имеет бага с bcprov и подходит для плагина)
+      - name: Set Gradle 8.5
         run: |
           cd android
-          sed -i 's/distributionUrl=.*/distributionUrl=https\\:\/\/services.gradle.org\/distributions\/gradle-8.1.1-all.zip/' gradle/wrapper/gradle-wrapper.properties
+          sed -i 's/distributionUrl=.*/distributionUrl=https\\:\/\/services.gradle.org\/distributions\/gradle-8.5-all.zip/' gradle/wrapper/gradle-wrapper.properties
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
+      # Собираем с флагами, отключающими демон и кэш (лечит баг)
       - name: Build APK
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --no-build-cache
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
