@@ -36,17 +36,19 @@ jobs:
       - name: Sync Files
         run: npx cap sync
 
+      # ПРИНУДИТЕЛЬНО МЕНЯЕМ ВЕРСИЮ GRADLE НА СТАБИЛЬНУЮ 8.1.1
+      - name: Downgrade Gradle to 8.1.1
+        run: |
+          cd android
+          sed -i 's/distributionUrl=.*/distributionUrl=https\\:\/\/services.gradle.org\/distributions\/gradle-8.1.1-all.zip/' gradle/wrapper/gradle-wrapper.properties
+
       - name: Make gradlew executable
         run: chmod +x android/gradlew
-
-      # Жесткая очистка кэша перед сборкой
-      - name: Force clean Gradle caches
-        run: rm -rf ~/.gradle/caches/jars-* ~/.gradle/caches/modules-2
 
       - name: Build APK
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --no-build-cache
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
